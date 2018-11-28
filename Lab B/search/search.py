@@ -103,6 +103,7 @@ def depthFirstSearch(problem):
         # zoek anders verder in alle vertakkingen (en geef aan dat deze locatie al bekeken is)
         if top[0] not in closed:
             closed.append(top[0])
+
             for p in problem.getSuccessors(top[0]):
                 stack.push((p[0], top[1] + [p[1]]))
 
@@ -128,9 +129,31 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
+    def f((state, path)):
+        return problem.getCostOfActions(path) + heuristic(state, problem)
+
+    # pqueue[0] = problem
+    # pqueue[1] = pad naar huidige situatie
+    pqueue = util.PriorityQueue()
+    pqueue.push((problem.getStartState(), []), 0)
+    closed = []
+
+    while not pqueue.isEmpty():
+        best = pqueue.pop()
+
+        if best[0] not in closed:
+            closed.append(best[0])
+
+            for p in problem.getSuccessors(best[0]):
+                # goal test op expansie
+                if problem.isGoalState(p[0]):
+                    return best[1] + [p[1]]
+
+                item = (p[0], best[1] + [p[1]])
+                pqueue.push(item, f(item))
+
+    return []
 
 # Abbreviations
 bfs = breadthFirstSearch
