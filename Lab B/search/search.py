@@ -112,8 +112,29 @@ def depthFirstSearch(problem):
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    # queue[0] = problem
+    # queue[1] = pad naar huidige situatie
+    queue = util.Queue()
+    queue.push((problem.getStartState(), []))
+    closed = []
+
+    # zolang er nog opties zijn: ...
+    while not queue.isEmpty():
+        top = queue.pop()
+        # return het pad naar deze locatie als het het doel is
+        if problem.isGoalState(top[0]):
+            return top[1]
+
+        # zoek anders verder in alle vertakkingen (en geef aan dat deze locatie al bekeken is)
+        if top[0] not in closed:
+            closed.append(top[0])
+
+            for p in problem.getSuccessors(top[0]):
+                queue.push((p[0], top[1] + [p[1]]))
+
+    # alle opties zijn bekeken, er is geen oplossing -> doe niks
+    return []
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
@@ -139,20 +160,24 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     pqueue.push((problem.getStartState(), []), 0)
     closed = []
 
+    # zolang er nog opties zijn: ...
     while not pqueue.isEmpty():
         best = pqueue.pop()
 
+        # als deze locatie nog niet bekeken is ...
         if best[0] not in closed:
             closed.append(best[0])
 
             for p in problem.getSuccessors(best[0]):
-                # goal test op expansie
+                # goal test op expansie; geef pad naar locatie terug als het het doel is
                 if problem.isGoalState(p[0]):
                     return best[1] + [p[1]]
 
+                # zoek anders verder in de vertakkingen
                 item = (p[0], best[1] + [p[1]])
                 pqueue.push(item, f(item))
 
+    # alle opties zijn bekeken, er is geen oplossing -> doe niks
     return []
 
 # Abbreviations
