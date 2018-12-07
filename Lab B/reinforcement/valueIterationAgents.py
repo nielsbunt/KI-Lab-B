@@ -35,32 +35,29 @@ class ValueIterationAgent(ValueEstimationAgent):
               mdp.getStates()
               mdp.getPossibleActions(state)
               mdp.getTransitionStatesAndProbs(state, action)
-              mdp.getReward(state, action, nextState)
+              mdp.getReward(state, action, next_state)
               mdp.isTerminal(state)
         """
         self.mdp = mdp
         self.discount = discount
         self.iterations = iterations
-        self.values = util.Counter() # A Counter is a dict with default 0
+        self.values = util.Counter()
 
         # Write value iteration code here
-        "*** YOUR CODE HERE ***"
+        for i in range(iterations):
+            for state in mdp.getStates():
+                alpha = 1  # TODO voor alpha moet waarschijnlijk iets van 1/(n+1)
+                old_value = self.values[state]
+                action_values = util.Counter()
+                
+                for action in mdp.getPossibleActions(state):
+                    for next_state, prob in mdp.getTransitionStatesAndProbs(state, action):
+                        # TODO fix
+                        # if i > 1 and self.values[next_state] != 0:
+                            # TODO fix
+                            action_values[action] += prob * alpha * (mdp.getReward(state, action, next_state) + discount * self.getValue(next_state) - old_value)
 
-
-        for i in range(0,iterations):
-            for staat in mdp.getStates():
-                alpha = 1 #voor alpha moet waarschijnlijk iets van 1/(n+1)
-                oud = self.values(staat)
-                toename = util.Counter()
-                for actie in mdp.getPossibleActions(staat):
-                    transStateProbs = mdp(staat, actie)
-                    for volgende in transStateProbs[0]:
-                        toename[actie] = toename[actie] + transStateProbs[1] *  alpha * (mdp.getReward(staat,actie,volgende) + discount * self.getValue(volgende) - oud)
-                besteRichting = toename.argMax()
-                self.values[staat] = oud + toename(besteRichting)
-
-
-
+                self.values[state] = old_value + action_values[action_values.argMax()]
 
     def getValue(self, state):
         """
@@ -68,24 +65,23 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
         return self.values[state]
 
-
     def computeQValueFromValues(self, state, action):
         """
           Compute the Q-value of action in state from the
           value function stored in self.values.
         """
+        # Bepaal in welke state we waarschijnlijk terechtkomen
+        # TODO volgens mij mag dit, misschien moet kans mee worden genomen
+        highest_prob = 0
+        next_state = state
 
+        for neighbour, prob in self.mdp.getTransitionStatesAndProbs(state, action):
+            if prob > highest_prob:
+                highest_prob = prob
+                next_state = neighbour
 
-        transStateProbs = mdp(state, action)
-        toename = 0
-        discount = 0.9
-        oud = self.values(state)
-        alpha = 1
-
-        for volgende in transStateProbs[0]:
-            toename = toename + transStateProbs[1] *  alpha * (mdp.getReward(state,action,volgende) + discount * self.getValue(volgende) - oud)
-
-        return oud+toename
+        # Geef de waarde van de betreffende state terug
+        return self.values[next_state]
 
     def computeActionFromValues(self, state):
         """
@@ -96,18 +92,26 @@ class ValueIterationAgent(ValueEstimationAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return None.
         """
-        "*** YOUR CODE HERE ***"
-        alpha = 1 #voor alpha moet waarschijnlijk iets van 1/(n+1)
-        oud = self.values(state)
-        toename = util.Counter()
-        discount = 0.9
+        highest_value = 0
+        best_action = None
 
-        for actie in mdp.getPossibleActions(state):
-            transStateProbs = mdp(state, actie)
-            for volgende in transStateProbs[0]:
-                toename[actie] = toename[actie] + transStateProbs[1] *  alpha * (mdp.getReward(state,actie,volgende) + discount * self.getValue(volgende) - oud)
-        return toename.argMax()
+        # Voor elke actie vanaf deze state...
+        for action in self.mdp.getPossibleActions(state):
+            # Bepaal in welke state we waarschijnlijk terechtkomen
+            # TODO volgens mij mag dit, misschien moet kans mee worden genomen
+            highest_prob = 0
+            for neighbour, prob in self.mdp.getTransitionStatesAndProbs(state, action):
+                if prob > highest_prob:
+                    highest_prob = prob
+                    next_state = neighbour
 
+            # Check of deze state de beste value heeft
+            if self.values[next_state] > highest_value:
+                highest_value = self.values[next_state]
+                best_action = action
+
+        # Geef de actie terug die naar de state leid die de beste value heeft
+        return best_action
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
