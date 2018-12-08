@@ -143,7 +143,7 @@ def uniformCostSearch(problem):
     pqueue.push((problem.getStartState(), []), 0)
     closed = []
 
-     # zolang er nog opties zijn: ...
+    # zolang er nog opties zijn: ...
     while not pqueue.isEmpty():
         cheapest = pqueue.pop()
         # return het pad naar deze locatie als het het doel is
@@ -182,17 +182,15 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     # zolang er nog opties zijn: ...
     while not pqueue.isEmpty():
         best = pqueue.pop()
+        # return het pad naar deze locatie als het het doel is
+        if problem.isGoalState(best[0]):
+            return best[1]
 
-        # als deze locatie nog niet bekeken is ...
+            # zoek anders verder in alle vertakkingen (en geef aan dat deze locatie al bekeken is)
         if best[0] not in closed:
             closed.append(best[0])
 
             for p in problem.getSuccessors(best[0]):
-                # goal test op expansie; geef pad naar locatie terug als het het doel is
-                if problem.isGoalState(p[0]):
-                    return best[1] + [p[1]]
-
-                # zoek anders verder in de vertakkingen
                 item = (p[0], best[1] + [p[1]])
                 pqueue.push(item, f(item))
 
