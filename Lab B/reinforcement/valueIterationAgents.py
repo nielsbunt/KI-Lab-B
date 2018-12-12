@@ -43,7 +43,6 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.iterations = iterations
         self.values = util.Counter()
 
-        # Write value iteration code here
         for i in range(iterations):
             new_values = util.Counter()
 
@@ -56,8 +55,8 @@ class ValueIterationAgent(ValueEstimationAgent):
                     for next_state, prob in mdp.getTransitionStatesAndProbs(state, action):
                         # TODO fix
                         # if i > 1 and self.values[next_state] != 0:
-                            # TODO fix
-                            action_values[action] += prob * alpha * (mdp.getReward(state, action, next_state) + discount * self.getValue(next_state) - old_value)
+                            action_values[action] += prob * alpha * (mdp.getReward(state, action, next_state) +
+                                                                     discount * self.getValue(next_state) - old_value)
 
                 new_values[state] = old_value + action_values[action_values.argMax()]
 
@@ -102,7 +101,6 @@ class ValueIterationAgent(ValueEstimationAgent):
         # Voor elke actie vanaf deze state...
         for action in self.mdp.getPossibleActions(state):
             # Bepaal in welke state we waarschijnlijk terechtkomen
-            # TODO volgens mij mag dit, misschien moet kans mee worden genomen
             highest_prob = 0
             for neighbour, prob in self.mdp.getTransitionStatesAndProbs(state, action):
                 if prob > highest_prob:
